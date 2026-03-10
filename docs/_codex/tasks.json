@@ -1,0 +1,326 @@
+{
+  "version": 2,
+  "last_updated": "2026-03-09",
+  "workflow": "@build",
+  "active_phase": "phase_5",
+  "next_task_id": null,
+  "source_artifacts": {
+    "brief": "docs/brief.md",
+    "architecture": "docs/architecture.md",
+    "mvp_spec": "specs/mvp.md",
+    "phase_plan": "docs/v1-phases.md"
+  },
+  "phase_status": {
+    "planning": "completed",
+    "phase_1": "completed",
+    "phase_2": "completed",
+    "phase_3": "completed",
+    "phase_4": "skipped_by_user",
+    "phase_5": "completed"
+  },
+  "tasks": [
+    {
+      "id": "planning_baseline",
+      "phase": "planning",
+      "title": "Planning baseline and durable artifacts",
+      "status": "completed",
+      "depends_on": [],
+      "artifacts": [
+        "docs/brief.md",
+        "docs/architecture.md",
+        "specs/mvp.md",
+        "docs/v1-phases.md"
+      ],
+      "exit_criteria": [
+        "Brief approved",
+        "Architecture baseline approved",
+        "MVP scope and phase order captured"
+      ],
+      "verification": [
+        "Manual review of planning artifacts"
+      ]
+    },
+    {
+      "id": "phase_1_foundation",
+      "phase": "phase_1",
+      "title": "Foundation and identity baseline",
+      "status": "completed",
+      "depends_on": [
+        "planning_baseline"
+      ],
+      "artifacts": [
+        "package.json",
+        "apps/api",
+        "apps/web",
+        "packages/domain",
+        "deploy/docker-compose.yml"
+      ],
+      "exit_criteria": [
+        "Login works",
+        "Forced password change works",
+        "Spaces exist",
+        "Audit baseline works",
+        "Compose baseline runs"
+      ],
+      "verification": [
+        "npm run typecheck",
+        "npm run build",
+        "docker compose config",
+        "docker compose up -d --build",
+        "GET /health"
+      ]
+    },
+    {
+      "id": "phase_2_content_basics",
+      "phase": "phase_2",
+      "title": "Content browsing and upload basics",
+      "status": "completed",
+      "depends_on": [
+        "phase_1_foundation"
+      ],
+      "artifacts": [
+        "apps/api/src/routes/content.ts",
+        "apps/api/src/storage.ts",
+        "apps/web/src/App.tsx"
+      ],
+      "exit_criteria": [
+        "Browse spaces and folders",
+        "Create folders",
+        "Upload files",
+        "Download files"
+      ],
+      "verification": [
+        "Folder create",
+        "File upload",
+        "File download",
+        "Web and API browsing"
+      ]
+    },
+    {
+      "id": "phase_2_content_management",
+      "phase": "phase_2",
+      "title": "Rename, move, and share management",
+      "status": "completed",
+      "depends_on": [
+        "phase_2_content_basics"
+      ],
+      "artifacts": [
+        "apps/api/src/routes/content.ts",
+        "apps/api/src/permissions.ts",
+        "apps/web/src/App.tsx"
+      ],
+      "exit_criteria": [
+        "Rename folders and files",
+        "Move folders and files",
+        "Grant share",
+        "List shares",
+        "Revoke shares"
+      ],
+      "verification": [
+        "Rename folder",
+        "Rename file",
+        "Move file",
+        "Share grant",
+        "Share revoke",
+        "Access removal after revoke"
+      ]
+    },
+    {
+      "id": "phase_2_search",
+      "phase": "phase_2",
+      "title": "Permission-aware metadata search",
+      "status": "completed",
+      "depends_on": [
+        "phase_2_content_management"
+      ],
+      "artifacts": [
+        "apps/api/src/routes/content.ts",
+        "apps/api/src/db.ts",
+        "apps/web/src/App.tsx"
+      ],
+      "exit_criteria": [
+        "Search by file name",
+        "Search by path",
+        "Search by uploader",
+        "Search by updated time",
+        "Skip inaccessible matches"
+      ],
+      "verification": [
+        "Admin search returns expected result",
+        "Non-owner search returns empty result after revoke"
+      ]
+    },
+    {
+      "id": "phase_3_recycle_bin",
+      "phase": "phase_3",
+      "title": "Recycle bin delete and restore",
+      "status": "completed",
+      "depends_on": [
+        "phase_2_search"
+      ],
+      "artifacts": [
+        "apps/api/src/db.ts",
+        "apps/api/src/routes/content.ts",
+        "apps/web/src/App.tsx"
+      ],
+      "exit_criteria": [
+        "Delete file to recycle bin",
+        "Delete folder to recycle bin",
+        "List recycle entries",
+        "Restore file",
+        "Restore folder"
+      ],
+      "verification": [
+        "Folder delete to recycle bin",
+        "Folder restore",
+        "File delete to recycle bin",
+        "File restore"
+      ]
+    },
+    {
+      "id": "phase_3_version_history",
+      "phase": "phase_3",
+      "title": "Version history baseline",
+      "status": "completed",
+      "depends_on": [
+        "phase_3_recycle_bin"
+      ],
+      "artifacts": [
+        "apps/api/src/db.ts",
+        "apps/api/src/routes/content.ts",
+        "apps/web/src/App.tsx"
+      ],
+      "exit_criteria": [
+        "File changes create version records",
+        "Version list endpoint exists",
+        "Version restore works for supported paths"
+      ],
+      "verification": [
+        "List versions",
+        "Replace file content",
+        "Restore older version",
+        "Confirm restored download content"
+      ]
+    },
+    {
+      "id": "phase_3_quota_groundwork",
+      "phase": "phase_3",
+      "title": "Quota model and occupied-storage accounting groundwork",
+      "status": "completed",
+      "depends_on": [
+        "phase_3_version_history"
+      ],
+      "artifacts": [
+        "apps/api/src/db.ts",
+        "apps/api/src/routes/content.ts",
+        "apps/web/src/App.tsx"
+      ],
+      "exit_criteria": [
+        "Quota model exists",
+        "Occupied-storage inputs are measurable",
+        "UI can display quota baseline"
+      ],
+      "verification": [
+        "Quota endpoint returns default limit and occupied-storage breakdown",
+        "UI displays quota baseline for selected space"
+      ]
+    },
+    {
+      "id": "phase_3_retention_jobs",
+      "phase": "phase_3",
+      "title": "Retention and cleanup groundwork",
+      "status": "completed",
+      "depends_on": [
+        "phase_3_quota_groundwork"
+      ],
+      "artifacts": [
+        "workers",
+        "apps/api"
+      ],
+      "exit_criteria": [
+        "Recycle retention path exists",
+        "Version pruning path exists",
+        "Quota refresh path exists"
+      ],
+      "verification": [
+        "Maintenance overview returns recycle and version candidates",
+        "Maintenance run returns quota refresh summaries",
+        "Maintenance run dry-run returns aggregate candidate sets"
+      ]
+    },
+    {
+      "id": "phase_4_editor_integration",
+      "phase": "phase_4",
+      "title": "ONLYOFFICE Docs Enterprise integration",
+      "status": "skipped_by_user",
+      "depends_on": [
+        "phase_3_retention_jobs"
+      ],
+      "artifacts": [
+        "packages/editor",
+        "apps/api",
+        "apps/web"
+      ],
+      "exit_criteria": [
+        "Single-editor lock works",
+        "Editor save callback works",
+        "Audit events for lock and save exist"
+      ],
+      "verification": [
+        "Editor session endpoint returns configuration guidance when the server is missing",
+        "User explicitly allowed the phase to be skipped for now"
+      ]
+    },
+    {
+      "id": "phase_5_public_metadata",
+      "phase": "phase_5",
+      "title": "Public knowledge metadata and publishing",
+      "status": "completed",
+      "depends_on": [
+        "phase_4_editor_integration"
+      ],
+      "artifacts": [
+        "apps/api",
+        "apps/web",
+        "packages/domain"
+      ],
+      "exit_criteria": [
+        "Public knowledge publishing is usable",
+        "Required metadata is enforced",
+        "Entry status updates work"
+      ],
+      "verification": [
+        "Category list returns taxonomy roots",
+        "Publish endpoint creates a public knowledge entry",
+        "Entry list returns the published entry",
+        "Metadata update changes entry status"
+      ]
+    },
+    {
+      "id": "phase_5_import_release_hardening",
+      "phase": "phase_5",
+      "title": "Import and release hardening",
+      "status": "completed",
+      "depends_on": [
+        "phase_5_public_metadata"
+      ],
+      "artifacts": [
+        "apps/api",
+        "apps/web",
+        "deploy",
+        "docs"
+      ],
+      "exit_criteria": [
+        "Import path is documented and operable",
+        "Release assumptions are documented",
+        "Acceptance coverage for remaining public knowledge flow is explicit"
+      ],
+      "verification": [
+        "Import guidance output is available",
+        "Import runbook exists in English and Chinese",
+        "Release-readiness checklist exists in English and Chinese",
+        "Local typecheck and build still pass"
+      ]
+    }
+  ]
+}

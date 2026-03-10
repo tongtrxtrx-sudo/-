@@ -1,0 +1,18 @@
+#:schema https://developers.openai.com/codex/config-schema.json
+
+profile = "build"
+
+# This repository uses the build workflow as the default execution style.
+# Note: this does not auto-activate `@build`. The user still needs to include
+# `@build` explicitly in the current message for the build workflow to be
+# considered active.
+
+# Keep the project instruction budget slightly larger because this repository
+# relies on planning artifacts plus continuity files under docs/_codex/.
+project_doc_max_bytes = 65536
+
+[profiles.planning]
+web_search = "disabled"
+
+[profiles.review]
+web_search = "disabled"

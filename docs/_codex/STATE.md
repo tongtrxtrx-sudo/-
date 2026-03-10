@@ -1,0 +1,135 @@
+# Codex Build State
+
+## Workflow
+
+- Mode: `@build`
+- Product: V1 enterprise on-prem file platform
+- Current implementation phase: `phase_5`
+- Current implementation focus: Phase 4 is user-skipped because no document server is available; Phase 5 import and release hardening is complete
+- Last continuity refresh: 2026-03-09
+
+## Source Of Truth
+
+- Product scope: [docs/brief.md](/D:/work/my-project/docs/brief.md)
+- Architecture boundary: [docs/architecture.md](/D:/work/my-project/docs/architecture.md)
+- MVP requirements: [specs/mvp.md](/D:/work/my-project/specs/mvp.md)
+- Phase plan: [docs/v1-phases.md](/D:/work/my-project/docs/v1-phases.md)
+- Task graph: [docs/_codex/tasks.json](/D:/work/my-project/docs/_codex/tasks.json)
+
+## Overall Status
+
+- Planning baseline: complete
+- Phase 1 foundation and identity: complete
+- Phase 2 spaces, files, permissions, and metadata search: complete
+- Phase 3 recycle bin slice: complete
+- Phase 3 version history slice: complete
+- Phase 3 quota groundwork: complete
+- Phase 3 retention groundwork: complete
+- Phase 4 online editing integration: skipped by explicit user direction
+- Phase 5 public knowledge release hardening: complete
+
+## Completed Deliverables
+
+- Planning artifacts completed and aligned:
+  - `docs/brief.md`
+  - `specs/mvp.md`
+  - `docs/architecture.md`
+  - `docs/v1-phases.md`
+- Runtime baseline completed:
+  - monorepo workspace
+  - shared domain package
+  - Fastify API shell
+  - React web shell
+  - PostgreSQL bootstrap
+  - Docker Compose baseline
+- Identity and operator baseline completed:
+  - seeded super administrator
+  - login
+  - forced password change
+  - user creation
+  - department creation
+  - audit event recording and query
+- File-platform basics completed:
+  - personal, department, and public spaces
+  - default department collaboration root folders
+  - public knowledge category roots
+  - folder creation
+  - file upload and download
+  - folder rename and move
+  - file rename and move
+  - folder and file share grant
+  - share listing and revoke
+  - directory user picker
+  - permission-aware metadata search
+- Lifecycle slice completed:
+  - delete folder to recycle bin
+  - delete file to recycle bin
+  - recycle bin listing by manageable space
+  - folder restore from recycle bin
+  - file restore from recycle bin
+  - file version snapshots
+  - version list
+  - file content replace
+  - restore to prior version
+  - default space quotas
+  - occupied-storage accounting
+  - quota summary endpoint
+  - quota display in UI
+  - maintenance overview endpoint
+  - dry-run recycle cleanup path
+  - dry-run version prune path
+  - executable quota refresh path
+  - public knowledge category listing
+  - public knowledge publish endpoint
+  - public knowledge metadata update endpoint
+  - public knowledge admin publish UI
+  - import guidance output
+  - import runbook documentation
+  - release-readiness checklist documentation
+
+## Verified Evidence
+
+- Local verification completed:
+  - `npm install`
+  - `npm run typecheck`
+  - `npm run build`
+- Deployment verification completed:
+  - `docker compose --env-file .env.example -f deploy/docker-compose.yml config`
+  - `docker compose --env-file .env.example -f deploy/docker-compose.yml up -d --build`
+- Runtime verification completed:
+  - `GET /health`
+  - super admin login
+  - department creation
+  - user creation
+  - content browsing
+  - folder create
+  - file upload
+  - file download
+  - rename and move for folders and files
+  - share grant, list, revoke
+  - search result visibility and inaccessible-result skipping
+  - recycle bin delete and restore for both folders and files
+
+## Known Gaps
+
+- Delete currently stops at recycle bin and does not yet enforce retention expiry rules.
+- Phase 4 remains intentionally skipped until a real ONLYOFFICE document server is available.
+
+## Current Data Assumptions
+
+- Development environment currently contains seeded and sample data from verification.
+- Runtime persistence currently depends on Docker volumes for PostgreSQL and app file storage.
+- Existing schemas are migrated in-place with additive SQL and `ALTER TABLE ... ADD COLUMN IF NOT EXISTS` patterns because development data is already present.
+
+## Next Implementation Slice
+
+- No further V1 implementation slice is active.
+- Resume Phase 4 only when a real ONLYOFFICE document server becomes available, or approve a new post-V1 scope.
+
+## Guardrails
+
+- Do not introduce AI behavior in V1.
+- Keep deployment single-server Docker Compose compatible.
+- Preserve least-privilege boundaries for browse, search, share, delete, recycle, and restore.
+- Keep public knowledge archived content hidden from default browse and search.
+- Do not implement hard delete semantics as “complete” before retention behavior exists.

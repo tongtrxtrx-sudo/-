@@ -1,0 +1,14 @@
+{
+  "name": "my-project",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspace @my-project/domain && npm run build --workspace @my-project/api && npm run build --workspace @my-project/web",
+    "typecheck": "npm run build --workspace @my-project/domain && npm run typecheck --workspace @my-project/api && npm run typecheck --workspace @my-project/web",
+    "dev:api": "npm run build --workspace @my-project/domain && npm run dev --workspace @my-project/api",
+    "dev:web": "npm run build --workspace @my-project/domain && npm run dev --workspace @my-project/web"
+  }
+}
