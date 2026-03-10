@@ -4,9 +4,9 @@
 
 - Mode: `@build`
 - Product: V1 enterprise on-prem file platform
-- Current implementation phase: `phase_5`
-- Current implementation focus: Phase 4 is user-skipped because no document server is available; Phase 5 import and release hardening is complete
-- Last continuity refresh: 2026-03-09
+- Current implementation phase: `post_v1`
+- Current implementation focus: V1 is implementation-complete under the user-approved Phase 4 skip; release assessment is now documented for handoff and next-scope selection
+- Last continuity refresh: 2026-03-11
 
 ## Source Of Truth
 
@@ -27,6 +27,7 @@
 - Phase 3 retention groundwork: complete
 - Phase 4 online editing integration: skipped by explicit user direction
 - Phase 5 public knowledge release hardening: complete
+- Post-V1 release assessment: complete
 
 ## Completed Deliverables
 
@@ -35,6 +36,7 @@
   - `specs/mvp.md`
   - `docs/architecture.md`
   - `docs/v1-phases.md`
+  - `docs/release-assessment.md`
 - Runtime baseline completed:
   - monorepo workspace
   - shared domain package
@@ -109,11 +111,14 @@
   - share grant, list, revoke
   - search result visibility and inaccessible-result skipping
   - recycle bin delete and restore for both folders and files
+- Documentation verification completed:
+  - bilingual alignment review for `docs/release-assessment.md`
 
 ## Known Gaps
 
 - Delete currently stops at recycle bin and does not yet enforce retention expiry rules.
 - Phase 4 remains intentionally skipped until a real ONLYOFFICE document server is available.
+- Automated bulk import and long-running retention execution remain beyond the current verified scope.
 
 ## Current Data Assumptions
 
@@ -123,8 +128,12 @@
 
 ## Next Implementation Slice
 
-- No further V1 implementation slice is active.
-- Resume Phase 4 only when a real ONLYOFFICE document server becomes available, or approve a new post-V1 scope.
+- No active implementation slice is currently in progress.
+- Choose one of the following before resuming `@build` implementation:
+  - restore Phase 4 with a real ONLYOFFICE document server
+  - automate first-wave import execution
+  - implement retention execution beyond the current groundwork
+  - add automated regression coverage for critical flows
 
 ## Guardrails
 

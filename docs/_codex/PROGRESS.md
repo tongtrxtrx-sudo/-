@@ -190,6 +190,19 @@
 - Admin public knowledge publishing runtime flow still works
 - Import and release documents now exist in English and Chinese companion form
 
+## 2026-03-11 - Post-V1 Release Assessment
+
+- Added a dedicated release assessment artifact:
+  - `docs/release-assessment.md`
+  - `docs/release-assessment.zh-CN.md`
+- Captured the current release verdict, tested scope, untested scope, blockers, residual risks, and recommended release modes.
+- Recorded that V1 is implementation-complete only under the explicit Phase 4 skip decision and that further work now requires a new post-V1 scope choice.
+
+### Verification
+
+- Manual bilingual alignment review of the new release assessment pair
+- Continuity files updated to reflect that no implementation slice is active
+
 ## Current Position
 
 - Phase 1: complete
@@ -200,4 +213,5 @@
 - Phase 3 retention-groundwork slice: complete
 - Phase 5 public-knowledge metadata slice: complete
 - Phase 5 import-and-release hardening slice: complete
+- Post-V1 release assessment: complete
 - No further V1 implementation slice is active

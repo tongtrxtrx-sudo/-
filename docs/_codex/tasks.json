@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "last_updated": "2026-03-09",
+  "last_updated": "2026-03-11",
   "workflow": "@build",
-  "active_phase": "phase_5",
+  "active_phase": "post_v1",
   "next_task_id": null,
   "source_artifacts": {
     "brief": "docs/brief.md",
@@ -16,7 +16,8 @@
     "phase_2": "completed",
     "phase_3": "completed",
     "phase_4": "skipped_by_user",
-    "phase_5": "completed"
+    "phase_5": "completed",
+    "post_v1": "completed"
   },
   "tasks": [
     {
@@ -320,6 +321,30 @@
         "Import runbook exists in English and Chinese",
         "Release-readiness checklist exists in English and Chinese",
         "Local typecheck and build still pass"
+      ]
+    },
+    {
+      "id": "post_v1_release_assessment",
+      "phase": "post_v1",
+      "title": "Document tested scope, untested scope, and release blockers for the current baseline",
+      "status": "completed",
+      "depends_on": [
+        "phase_5_import_release_hardening"
+      ],
+      "artifacts": [
+        "docs/release-assessment.md",
+        "docs/release-assessment.zh-CN.md",
+        "docs/_codex/STATE.md",
+        "docs/_codex/PROGRESS.md"
+      ],
+      "exit_criteria": [
+        "Release verdict is documented",
+        "Tested and untested scope are explicit",
+        "Blockers and recommended next actions are captured"
+      ],
+      "verification": [
+        "Manual alignment review of the English and Chinese release assessment files",
+        "Continuity files reflect that no implementation slice is active"
       ]
     }
   ]
