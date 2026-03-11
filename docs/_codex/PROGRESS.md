@@ -253,7 +253,12 @@
     - public API base URL `http://localhost:3001`
     - internal API base URL `http://api:3001`
   - browser automation opened a real ONLYOFFICE iframe for a supported `.docx` file
-- Remaining gap: real save callback and version creation through the live editor are still pending
+- Save-callback investigation findings:
+  - ONLYOFFICE command service accepted `forcesave` with `error = 0`
+  - ONLYOFFICE sent callback requests with both `status = 6` and later `status = 2`
+  - callback token lifetime was extended from `15m` to `8h` for content and callback URLs
+  - callback download retry logic was expanded
+  - the remaining blocker is still callback-time output download failure, even though the same normalized internal URL is reachable immediately afterwards from the API container
 
 ## Current Position
 

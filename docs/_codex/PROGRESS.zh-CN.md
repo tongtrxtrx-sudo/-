@@ -253,7 +253,12 @@
     - 浏览器 API 地址 `http://localhost:3001`
     - 容器内部 API 地址 `http://api:3001`
   - 浏览器自动化已经为一个受支持的 `.docx` 文件打开了真实 ONLYOFFICE iframe
-- 剩余缺口：通过真实编辑器触发保存回调并生成新版本这条链路仍未完成
+- 保存回调排查结果：
+  - ONLYOFFICE 命令服务接受了 `forcesave`，并返回 `error = 0`
+  - ONLYOFFICE 实际发出了 `status = 6` 以及后续的 `status = 2` callback
+  - 内容和回调 URL 的 token 有效期已经从 `15m` 提高到 `8h`
+  - callback 下载的重试窗口也已经放大
+  - 但剩余阻塞点仍然是：callback 执行窗口内下载生成的 `output.docx` 失败，而同一条标准化后的内部 URL 在失败后又能立即从 API 容器访问
 
 ## 当前所处位置
 

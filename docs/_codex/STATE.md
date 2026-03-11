@@ -5,7 +5,7 @@
 - Mode: `@build`
 - Product: V1 enterprise on-prem file platform
 - Current implementation phase: `phase_4`
-- Current implementation focus: Phase 4 now wires a real ONLYOFFICE Compose service and public/internal URL split; runtime validation is waiting on the first large image pull plus final document-server startup
+- Current implementation focus: real ONLYOFFICE runtime is now reachable and browser editor open is verified; the remaining Phase 4 blocker is callback-time download of generated output during save handling
 - Last continuity refresh: 2026-03-11
 
 ## Source Of Truth
@@ -128,6 +128,12 @@
 
 - Delete currently stops at recycle bin and does not yet enforce retention expiry rules.
 - Real save-and-callback content round-trip still remains to be verified against the reachable ONLYOFFICE document server.
+- Current callback blocker is reproducible:
+  - ONLYOFFICE sends callback requests
+  - API receives them
+  - browser sessions are valid
+  - generated output URLs are reachable from the API container after the callback failure
+  - but callback-time download still fails inside the handler
 - Automated bulk import and long-running retention execution remain beyond the current verified scope.
 
 ## Current Data Assumptions
@@ -138,8 +144,8 @@
 
 ## Next Implementation Slice
 
-- Active slice: bring up the real ONLYOFFICE Compose service and validate the integrated runtime path.
-- After the document server is fully available, validate browser editor open and save-callback behavior against the reachable service.
+- Active slice: debug callback-time download of ONLYOFFICE generated output so save-and-version behavior can complete.
+- After this blocker is resolved, re-run forcesave validation and confirm version creation plus `onlyoffice_saved` audit events.
 
 ## Guardrails
 

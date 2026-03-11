@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import jwt from "jsonwebtoken";
+import type { SignOptions } from "jsonwebtoken";
 import { z } from "zod";
 import type { FastifyInstance } from "fastify";
 import { env } from "../config.js";
@@ -75,9 +76,12 @@ function resolveDocumentType(fileName: string): {
   }
 }
 
-function signEditorToken(payload: Record<string, unknown>): string {
+function signEditorToken(
+  payload: Record<string, unknown>,
+  expiresIn: SignOptions["expiresIn"] = "15m"
+): string {
   return jwt.sign(payload, onlyOfficeSecret(), {
-    expiresIn: "15m"
+    expiresIn
   });
 }
 
@@ -123,6 +127,35 @@ function normalizeOnlyOfficeDownloadUrl(callbackUrl: string): string {
   return normalized.toString();
 }
 
+async function fetchOnlyOfficeCallbackContent(callbackUrl: string): Promise<Response> {
+  const normalizedUrl = normalizeOnlyOfficeDownloadUrl(callbackUrl);
+  let lastError: Error | null = null;
+
+  for (let attempt = 1; attempt <= 30; attempt += 1) {
+    try {
+      const response = await fetch(normalizedUrl, {
+        signal: AbortSignal.timeout(2000)
+      });
+
+      if (response.ok) {
+        return response;
+      }
+
+      lastError = new Error(`ONLYOFFICE callback download returned status ${response.status}.`);
+    } catch (error) {
+      lastError = error as Error;
+    }
+
+    if (attempt < 30) {
+      await new Promise((resolve) => {
+        setTimeout(resolve, 1000);
+      });
+    }
+  }
+
+  throw new Error(`Failed to fetch saved content from ONLYOFFICE callback URL after retries: ${lastError?.message ?? "unknown error"}`);
+}
+
 export async function registerEditorRoutes(app: FastifyInstance): Promise<void> {
   app.get(
     "/editor/files/:fileId/session",
@@ -150,11 +183,11 @@ export async function registerEditorRoutes(app: FastifyInstance): Promise<void> 
         const accessToken = signEditorToken({
           purpose: "onlyoffice-content",
           fileId: resolved.file.id
-        });
+        }, "8h");
         const callbackToken = signEditorToken({
           purpose: "onlyoffice-callback",
           fileId: resolved.file.id
-        });
+        }, "8h");
 
         const lockResult = resolved.capabilities.canEdit
           ? await acquireFileLock({
@@ -276,10 +309,7 @@ export async function registerEditorRoutes(app: FastifyInstance): Promise<void> 
         verifyEditorToken(query.token, "onlyoffice-callback", params.fileId);
 
         if ((body.status === 2 || body.status === 6) && body.url) {
-          const response = await fetch(normalizeOnlyOfficeDownloadUrl(body.url));
-          if (!response.ok) {
-            throw new Error("Failed to fetch saved content from ONLYOFFICE callback URL.");
-          }
+          const response = await fetchOnlyOfficeCallbackContent(body.url);
 
           const arrayBuffer = await response.arrayBuffer();
           const file = await findFileById(params.fileId);

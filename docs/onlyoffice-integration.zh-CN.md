@@ -81,4 +81,9 @@
 
 - 第一次启动文档服务器仍然依赖目标官方镜像已存在于本机，或者先被 Docker 拉取完成
 - 面向可访问 ONLYOFFICE 服务的真实编辑器保存回调端到端验证尚未完成
+- 当前保存回调的阻塞点：
+  - ONLYOFFICE 已经能成功向 API 发出 callback 请求
+  - `forcesave` 命令返回 `error = 0`
+  - 浏览器里的编辑器会话也能正常打开
+  - 但 API 在 callback 时下载生成的 `output.docx` 仍然失败，而同一条内部 URL 在 callback 失败后又能立即从 API 容器里访问到
 - ONLYOFFICE 的生产部署加固尚未完成

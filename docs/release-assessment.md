@@ -41,7 +41,7 @@ The following areas have implementation and direct verification evidence:
 
 The following areas remain unverified or only scaffolded:
 
-- Real ONLYOFFICE save-callback content round-trip against a reachable document server
+- Real ONLYOFFICE save-callback content round-trip against a reachable document server remains incomplete; current evidence shows callback requests arrive but the generated output download still fails during callback handling
 - Automated bulk import execution against a realistic department data set
 - Long-running retention execution, including recycle expiry and version pruning over time
 - Full browser-based end-to-end regression coverage

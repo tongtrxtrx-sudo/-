@@ -81,4 +81,9 @@ This document describes how the repository integrates with a self-hosted ONLYOFF
 
 - First-run document-server startup still depends on the selected official image being present locally or being pulled into Docker
 - Full end-to-end editor save verification has not been completed against a reachable ONLYOFFICE server
+- Current save-callback blocker:
+  - ONLYOFFICE successfully posts callback requests to the API
+  - `forcesave` command requests return `error = 0`
+  - browser editor sessions open successfully
+  - but the API still fails while downloading the generated `output.docx` during callback time, even though the same internal URL is reachable immediately afterwards from the API container
 - Final production hardening for ONLYOFFICE deployment is still pending
