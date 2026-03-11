@@ -85,5 +85,7 @@
   - ONLYOFFICE 已经能成功向 API 发出 callback 请求
   - `forcesave` 命令返回 `error = 0`
   - 浏览器里的编辑器会话也能正常打开
+  - callback token 生命周期已经延长，callback 下载重试窗口也已经放大
+  - 测试文件也已经替换成合法的 `.docx` 夹具
   - 但 API 在 callback 时下载生成的 `output.docx` 仍然失败，而同一条内部 URL 在 callback 失败后又能立即从 API 容器里访问到
 - ONLYOFFICE 的生产部署加固尚未完成

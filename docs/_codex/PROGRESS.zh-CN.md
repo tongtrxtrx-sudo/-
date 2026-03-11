@@ -258,6 +258,7 @@
   - ONLYOFFICE 实际发出了 `status = 6` 以及后续的 `status = 2` callback
   - 内容和回调 URL 的 token 有效期已经从 `15m` 提高到 `8h`
   - callback 下载的重试窗口也已经放大
+  - 测试夹具也已经替换为来自 ONLYOFFICE 自身生成的合法 `.docx`
   - 但剩余阻塞点仍然是：callback 执行窗口内下载生成的 `output.docx` 失败，而同一条标准化后的内部 URL 在失败后又能立即从 API 容器访问
 
 ## 当前所处位置

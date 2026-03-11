@@ -133,6 +133,8 @@
   - API receives them
   - browser sessions are valid
   - generated output URLs are reachable from the API container after the callback failure
+  - callback token lifetime and retry windows were increased
+  - a valid `.docx` fixture was used for re-validation
   - but callback-time download still fails inside the handler
 - Automated bulk import and long-running retention execution remain beyond the current verified scope.
 

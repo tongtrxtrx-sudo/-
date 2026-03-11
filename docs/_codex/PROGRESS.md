@@ -258,6 +258,7 @@
   - ONLYOFFICE sent callback requests with both `status = 6` and later `status = 2`
   - callback token lifetime was extended from `15m` to `8h` for content and callback URLs
   - callback download retry logic was expanded
+  - the test fixture was replaced with a real `.docx` file extracted from ONLYOFFICE itself
   - the remaining blocker is still callback-time output download failure, even though the same normalized internal URL is reachable immediately afterwards from the API container
 
 ## Current Position
