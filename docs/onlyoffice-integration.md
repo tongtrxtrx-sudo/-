@@ -15,14 +15,20 @@ This document describes how the repository integrates with a self-hosted ONLYOFF
 - Session responses now distinguish edit mode, read-only permission mode, and lock-held-by-other-user mode
 - Callback downloads are restricted to the configured ONLYOFFICE document-server origin
 - Audit events now cover lock acquisition, lock renewal, locked read-only opens, callback save, callback release, and force unlock
+- Docker Compose now defines a real `onlyoffice` service using the official document-server image
+- API routing now distinguishes public and internal URLs for both the API and ONLYOFFICE service
 - Real editor runtime validation is blocked until a reachable ONLYOFFICE server is configured
 
 ## Required Environment Variables
 
 - `API_PUBLIC_BASE_URL`
   - Publicly reachable base URL for the API from the ONLYOFFICE server perspective
+- `API_INTERNAL_BASE_URL`
+  - Internal API base URL used by the document server for content download and callback traffic
 - `ONLYOFFICE_DOCUMENT_SERVER_URL`
-  - Base URL of the self-hosted ONLYOFFICE document server
+  - Publicly reachable base URL of the self-hosted ONLYOFFICE document server for the browser
+- `ONLYOFFICE_DOCUMENT_SERVER_INTERNAL_URL`
+  - Internal document-server URL used by the API container for callback download validation and fetches
 - `ONLYOFFICE_JWT_SECRET`
   - Optional JWT secret for signing ONLYOFFICE session payloads
 - `EDIT_LOCK_MINUTES`
@@ -46,6 +52,14 @@ This document describes how the repository integrates with a self-hosted ONLYOFF
   - force unlock releases the lock
   - the second editor can acquire a fresh lock after force unlock
 
+## Docker Compose Wiring
+
+- Browser-facing editor URL default: `http://localhost:8080`
+- API-facing internal editor URL default: `http://onlyoffice`
+- API public base URL default: `http://localhost:3001`
+- API internal base URL default: `http://api:3001`
+- Default Compose image: `onlyoffice/documentserver:latest`
+
 ## Expected Validation After The Server Is Available
 
 1. Configure `ONLYOFFICE_DOCUMENT_SERVER_URL`
@@ -62,6 +76,6 @@ This document describes how the repository integrates with a self-hosted ONLYOFF
 
 ## Known Gaps
 
-- The current environment does not yet provide a real document server
+- First-run document-server startup still depends on pulling a large official image into Docker
 - Full end-to-end editor save verification has not been completed against a reachable ONLYOFFICE server
 - Final production hardening for ONLYOFFICE deployment is still pending

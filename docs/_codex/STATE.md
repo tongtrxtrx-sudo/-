@@ -5,7 +5,7 @@
 - Mode: `@build`
 - Product: V1 enterprise on-prem file platform
 - Current implementation phase: `phase_4`
-- Current implementation focus: Phase 4 has been resumed from the prior skip state; the current slice strengthens editor lock behavior, callback safety, and operator recovery before real document-server validation
+- Current implementation focus: Phase 4 now wires a real ONLYOFFICE Compose service and public/internal URL split; runtime validation is waiting on the first large image pull plus final document-server startup
 - Last continuity refresh: 2026-03-11
 
 ## Source Of Truth
@@ -133,8 +133,8 @@
 
 ## Next Implementation Slice
 
-- Active slice: strengthen editor lock semantics, callback safety checks, and operator recovery paths for Phase 4.
-- After this slice, validate real editor save behavior against a reachable ONLYOFFICE document server.
+- Active slice: bring up the real ONLYOFFICE Compose service and validate the integrated runtime path.
+- After the document server is fully available, validate browser editor open and save-callback behavior against the reachable service.
 
 ## Guardrails
 

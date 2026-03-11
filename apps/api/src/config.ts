@@ -18,9 +18,18 @@ const envSchema = z.object({
   PUBLIC_KNOWLEDGE_SPACE_NAME: z.string().min(1).default("Public Knowledge Base"),
   FILE_STORAGE_ROOT: z.string().min(1).default("./.data/files"),
   API_PUBLIC_BASE_URL: z.string().url().default("http://localhost:3001"),
+  API_INTERNAL_BASE_URL: z.preprocess(emptyStringToUndefined, z.string().url().optional()),
   ONLYOFFICE_DOCUMENT_SERVER_URL: z.preprocess(emptyStringToUndefined, z.string().url().optional()),
+  ONLYOFFICE_DOCUMENT_SERVER_INTERNAL_URL: z.preprocess(emptyStringToUndefined, z.string().url().optional()),
   ONLYOFFICE_JWT_SECRET: z.preprocess(emptyStringToUndefined, z.string().optional()),
   EDIT_LOCK_MINUTES: z.coerce.number().min(1).max(240).default(30)
 });
 
-export const env = envSchema.parse(process.env);
+const parsedEnv = envSchema.parse(process.env);
+
+export const env = {
+  ...parsedEnv,
+  API_INTERNAL_BASE_URL: parsedEnv.API_INTERNAL_BASE_URL ?? parsedEnv.API_PUBLIC_BASE_URL,
+  ONLYOFFICE_DOCUMENT_SERVER_INTERNAL_URL:
+    parsedEnv.ONLYOFFICE_DOCUMENT_SERVER_INTERNAL_URL ?? parsedEnv.ONLYOFFICE_DOCUMENT_SERVER_URL
+};

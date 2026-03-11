@@ -229,6 +229,23 @@
   - `onlyoffice_opened_locked_view`
   - `file_force_unlocked`
 
+## 2026-03-11 - Phase 4 真实服务接线
+
+- 为下面两组地址增加了公网/容器内分离支持：
+  - API 对浏览器暴露的地址与 ONLYOFFICE 在容器网络中访问 API 的内部地址
+  - ONLYOFFICE 对浏览器暴露的地址与 API 容器访问 ONLYOFFICE 的内部地址
+- 调整了编辑会话生成逻辑，使 ONLYOFFICE 的服务间流量走内部 API 地址，而浏览器继续拿到公网编辑器地址。
+- 在 Docker Compose 中增加了真实的 `onlyoffice` 服务，并为其配置了独立卷。
+- 更新了 ONLYOFFICE 运维文档，说明 Compose 拓扑和 URL 分离方式。
+
+### 验证
+
+- `npm run typecheck`
+- `npm run build`
+- `docker compose --env-file .env.example -f deploy/docker-compose.yml config`
+- 已启动 `onlyoffice/documentserver:latest` 的首次镜像拉取
+- 最终运行态验证仍在等待官方镜像拉取完成和首次启动结束
+
 ## 当前所处位置
 
 - Phase 1：完成

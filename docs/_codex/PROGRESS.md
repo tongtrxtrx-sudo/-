@@ -229,6 +229,23 @@
   - `onlyoffice_opened_locked_view`
   - `file_force_unlocked`
 
+## 2026-03-11 - Phase 4 Real-Service Wiring
+
+- Added public/internal URL support for:
+  - API public versus internal base URLs
+  - ONLYOFFICE public versus internal document-server URLs
+- Updated editor session generation so ONLYOFFICE server-to-server traffic uses internal API URLs while the browser still receives the public editor URL.
+- Added a real `onlyoffice` service to Docker Compose with the official document-server image and dedicated volumes.
+- Updated ONLYOFFICE operator documentation to describe the Compose topology and URL split.
+
+### Verification
+
+- `npm run typecheck`
+- `npm run build`
+- `docker compose --env-file .env.example -f deploy/docker-compose.yml config`
+- First-run image pull started for `onlyoffice/documentserver:latest`
+- Final runtime verification is still pending because the official image pull and first startup are still in progress
+
 ## Current Position
 
 - Phase 1: complete

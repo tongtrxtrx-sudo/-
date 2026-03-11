@@ -4,6 +4,7 @@ import { hashPassword, requireSuperAdmin } from "../auth.js";
 import { createAuditEvent, createDepartment, createUser, listAuditEvents, listDepartments, listUsers, resetUserPassword } from "../db.js";
 import { listExpiredRecycleCandidates, listPrunableVersionCandidates, runRetentionJob } from "../maintenance.js";
 import { listPublicKnowledgeCategories } from "../db.js";
+import { env } from "../config.js";
 
 const departmentSchema = z.object({
   name: z.string().min(2),
@@ -30,21 +31,28 @@ const maintenanceRunSchema = z.object({
 async function getOnlyOfficeStatus(): Promise<{
   configured: boolean;
   documentServerUrl: string | null;
+  internalDocumentServerUrl: string | null;
   apiPublicBaseUrl: string;
+  apiInternalBaseUrl: string;
   jwtConfigured: boolean;
   supportedExtensions: string[];
   reachable: boolean;
   message: string;
 }> {
-  const documentServerUrl = process.env.ONLYOFFICE_DOCUMENT_SERVER_URL?.trim() || null;
-  const apiPublicBaseUrl = process.env.API_PUBLIC_BASE_URL?.trim() || "http://localhost:3001";
-  const jwtConfigured = Boolean(process.env.ONLYOFFICE_JWT_SECRET?.trim());
+  const documentServerUrl = env.ONLYOFFICE_DOCUMENT_SERVER_URL ?? null;
+  const internalDocumentServerUrl =
+    env.ONLYOFFICE_DOCUMENT_SERVER_INTERNAL_URL ?? env.ONLYOFFICE_DOCUMENT_SERVER_URL ?? null;
+  const apiPublicBaseUrl = env.API_PUBLIC_BASE_URL;
+  const apiInternalBaseUrl = env.API_INTERNAL_BASE_URL;
+  const jwtConfigured = Boolean(env.ONLYOFFICE_JWT_SECRET?.trim());
 
   if (!documentServerUrl) {
     return {
       configured: false,
       documentServerUrl: null,
+      internalDocumentServerUrl,
       apiPublicBaseUrl,
+      apiInternalBaseUrl,
       jwtConfigured,
       supportedExtensions: ["docx", "xlsx", "pptx"],
       reachable: false,
@@ -53,30 +61,34 @@ async function getOnlyOfficeStatus(): Promise<{
   }
 
   try {
-    const response = await fetch(`${documentServerUrl}/web-apps/apps/api/documents/api.js`, {
+    const response = await fetch(`${internalDocumentServerUrl ?? documentServerUrl}/web-apps/apps/api/documents/api.js`, {
       method: "HEAD"
     });
 
     return {
       configured: true,
       documentServerUrl,
+      internalDocumentServerUrl,
       apiPublicBaseUrl,
+      apiInternalBaseUrl,
       jwtConfigured,
       supportedExtensions: ["docx", "xlsx", "pptx"],
       reachable: response.ok,
       message: response.ok
-        ? "ONLYOFFICE document server is reachable."
-        : `ONLYOFFICE document server responded with status ${response.status}.`
+        ? "ONLYOFFICE document server is reachable from the API container."
+        : `ONLYOFFICE document server responded with status ${response.status} when checked from the API container.`
     };
   } catch (error) {
     return {
       configured: true,
       documentServerUrl,
+      internalDocumentServerUrl,
       apiPublicBaseUrl,
+      apiInternalBaseUrl,
       jwtConfigured,
       supportedExtensions: ["docx", "xlsx", "pptx"],
       reachable: false,
-      message: `ONLYOFFICE document server check failed: ${(error as Error).message}`
+      message: `ONLYOFFICE document server check failed from the API container: ${(error as Error).message}`
     };
   }
 }

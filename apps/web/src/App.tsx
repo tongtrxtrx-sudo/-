@@ -55,7 +55,9 @@ interface EditorSessionPayload {
 interface OnlyOfficeStatus {
   configured: boolean;
   documentServerUrl: string | null;
+  internalDocumentServerUrl: string | null;
   apiPublicBaseUrl: string;
+  apiInternalBaseUrl: string;
   jwtConfigured: boolean;
   supportedExtensions: string[];
   reachable: boolean;
@@ -1998,8 +2000,16 @@ export function App(): ReactElement {
                       <dd>{onlyOfficeStatus.documentServerUrl ?? "Not configured"}</dd>
                     </div>
                     <div>
+                      <dt>Internal Server URL</dt>
+                      <dd>{onlyOfficeStatus.internalDocumentServerUrl ?? "Not configured"}</dd>
+                    </div>
+                    <div>
                       <dt>API Public Base URL</dt>
                       <dd>{onlyOfficeStatus.apiPublicBaseUrl}</dd>
+                    </div>
+                    <div>
+                      <dt>API Internal Base URL</dt>
+                      <dd>{onlyOfficeStatus.apiInternalBaseUrl}</dd>
                     </div>
                     <div>
                       <dt>JWT Configured</dt>

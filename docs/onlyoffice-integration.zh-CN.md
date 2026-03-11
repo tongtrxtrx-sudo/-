@@ -15,14 +15,20 @@
 - 会话响应现在会区分可编辑模式、只读权限模式和“被他人持锁”的只读模式
 - 回调下载现在会限制在已配置的 ONLYOFFICE 文档服务器来源之内
 - 审计事件现在覆盖锁获取、锁续期、因他人持锁而只读打开、回调保存、回调释放和强制解锁
+- Docker Compose 现在已经定义了真实的 `onlyoffice` 服务，并使用官方文档服务器镜像
+- API 路由现在已经区分 API 和 ONLYOFFICE 服务的公网地址与容器内地址
 - 在配置真实且可达的 ONLYOFFICE 服务前，无法完成真实编辑器运行验证
 
 ## 必需环境变量
 
 - `API_PUBLIC_BASE_URL`
   - 从 ONLYOFFICE 服务器视角可访问到的 API 基础地址
+- `API_INTERNAL_BASE_URL`
+  - 文档服务器在容器网络中用于下载内容和回调的 API 内部地址
 - `ONLYOFFICE_DOCUMENT_SERVER_URL`
-  - 自托管 ONLYOFFICE 文档服务器的基础地址
+  - 浏览器访问自托管 ONLYOFFICE 文档服务器时使用的公网地址
+- `ONLYOFFICE_DOCUMENT_SERVER_INTERNAL_URL`
+  - API 容器用于校验和拉取回调内容的 ONLYOFFICE 内部地址
 - `ONLYOFFICE_JWT_SECRET`
   - 可选，用于签名 ONLYOFFICE 会话载荷的 JWT 密钥
 - `EDIT_LOCK_MINUTES`
@@ -46,6 +52,14 @@
   - 强制解锁会释放当前锁
   - 强制解锁后，第二个编辑者可以重新拿到新的编辑锁
 
+## Docker Compose 接线
+
+- 浏览器访问编辑器的默认地址：`http://localhost:8080`
+- API 容器访问编辑器的默认内部地址：`http://onlyoffice`
+- API 对浏览器暴露的默认地址：`http://localhost:3001`
+- API 在容器网络中的默认内部地址：`http://api:3001`
+- Compose 默认使用的镜像：`onlyoffice/documentserver:latest`
+
 ## 文档服务器可用后的预期验证步骤
 
 1. 配置 `ONLYOFFICE_DOCUMENT_SERVER_URL`
@@ -62,6 +76,6 @@
 
 ## 已知缺口
 
-- 当前环境还没有真实文档服务器
+- 第一次启动文档服务器仍然依赖 Docker 拉取一个很大的官方镜像
 - 面向可访问 ONLYOFFICE 服务的真实编辑器保存回调端到端验证尚未完成
 - ONLYOFFICE 的生产部署加固尚未完成
