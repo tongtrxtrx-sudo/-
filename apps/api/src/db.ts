@@ -20,6 +20,7 @@ import { env } from "./config.js";
 import type {
   AuditRecord,
   DepartmentRecord,
+  EditorCallbackJobRecord,
   FileLockRecord,
   FileRecord,
   FileVersionRecord,
@@ -130,6 +131,23 @@ CREATE TABLE IF NOT EXISTS file_locks (
   locked_by_user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   expires_at TIMESTAMPTZ NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS editor_callback_jobs (
+  id TEXT PRIMARY KEY,
+  file_id TEXT NOT NULL REFERENCES files(id) ON DELETE CASCADE,
+  callback_status INTEGER NOT NULL,
+  callback_url TEXT NOT NULL UNIQUE,
+  callback_users JSONB NOT NULL DEFAULT '[]'::jsonb,
+  payload JSONB NOT NULL DEFAULT '{}'::jsonb,
+  status TEXT NOT NULL DEFAULT 'PENDING',
+  attempts INTEGER NOT NULL DEFAULT 0,
+  next_attempt_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  processing_started_at TIMESTAMPTZ NULL,
+  completed_at TIMESTAMPTZ NULL,
+  last_error TEXT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS space_quotas (
@@ -273,6 +291,23 @@ type FileLockRow = {
   locked_by_user_id: string;
   created_at: string;
   expires_at: string;
+};
+
+type EditorCallbackJobRow = {
+  id: string;
+  file_id: string;
+  callback_status: number;
+  callback_url: string;
+  callback_users: string[];
+  payload: Record<string, unknown>;
+  status: EditorCallbackJobRecord["status"];
+  attempts: number;
+  next_attempt_at: string;
+  processing_started_at: string | null;
+  completed_at: string | null;
+  last_error: string | null;
+  created_at: string;
+  updated_at: string;
 };
 
 type RecycleEntryRow = {
@@ -459,6 +494,25 @@ function mapFileLock(row: FileLockRow): FileLockRecord {
     lockedByUserId: row.locked_by_user_id,
     createdAt: row.created_at,
     expiresAt: row.expires_at
+  };
+}
+
+function mapEditorCallbackJob(row: EditorCallbackJobRow): EditorCallbackJobRecord {
+  return {
+    id: row.id,
+    fileId: row.file_id,
+    callbackStatus: row.callback_status,
+    callbackUrl: row.callback_url,
+    callbackUsers: row.callback_users,
+    payload: row.payload,
+    status: row.status,
+    attempts: row.attempts,
+    nextAttemptAt: row.next_attempt_at,
+    processingStartedAt: row.processing_started_at,
+    completedAt: row.completed_at,
+    lastError: row.last_error,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at
   };
 }
 
@@ -1934,6 +1988,144 @@ export async function releaseFileLock(fileId: string): Promise<FileLockRecord | 
     [fileId]
   );
   return result.rows[0] ? mapFileLock(result.rows[0]) : null;
+}
+
+export async function enqueueEditorCallbackJob(input: {
+  fileId: string;
+  callbackStatus: number;
+  callbackUrl: string;
+  callbackUsers: string[];
+  payload: Record<string, unknown>;
+}): Promise<EditorCallbackJobRecord> {
+  const inserted = await pool.query<EditorCallbackJobRow>(
+    `INSERT INTO editor_callback_jobs (
+       id,
+       file_id,
+       callback_status,
+       callback_url,
+       callback_users,
+       payload,
+       status,
+       attempts,
+       next_attempt_at
+     )
+     VALUES ($1, $2, $3, $4, $5::jsonb, $6::jsonb, 'PENDING', 0, NOW())
+     VALUES ($1, $2, $3, $4, $5::jsonb, $6::jsonb, 'PENDING', 0, NOW() + INTERVAL '20 seconds')
+     ON CONFLICT (callback_url)
+     DO UPDATE SET
+       callback_status = EXCLUDED.callback_status,
+       callback_users = EXCLUDED.callback_users,
+       payload = EXCLUDED.payload,
+       status = 'PENDING',
+       next_attempt_at = NOW() + INTERVAL '20 seconds',
+        updated_at = NOW()
+     RETURNING id,
+               file_id,
+               callback_status,
+               callback_url,
+               callback_users,
+               payload,
+               status,
+               attempts,
+               next_attempt_at::text,
+               processing_started_at::text,
+               completed_at::text,
+               last_error,
+               created_at::text,
+               updated_at::text`,
+    [
+      randomUUID(),
+      input.fileId,
+      input.callbackStatus,
+      input.callbackUrl,
+      JSON.stringify(input.callbackUsers),
+      JSON.stringify(input.payload)
+    ]
+  );
+
+  return mapEditorCallbackJob(requireFirstRow(inserted.rows, "Failed to enqueue editor callback job."));
+}
+
+export async function claimNextEditorCallbackJob(): Promise<EditorCallbackJobRecord | null> {
+  const client = await pool.connect();
+
+  try {
+    await client.query("BEGIN");
+    const claimed = await client.query<EditorCallbackJobRow>(
+      `WITH candidate AS (
+         SELECT id
+         FROM editor_callback_jobs
+         WHERE status = 'PENDING'
+           AND next_attempt_at <= NOW()
+         ORDER BY next_attempt_at ASC, created_at ASC
+         LIMIT 1
+         FOR UPDATE SKIP LOCKED
+       )
+       UPDATE editor_callback_jobs
+       SET status = 'PROCESSING',
+           attempts = attempts + 1,
+           processing_started_at = NOW(),
+           updated_at = NOW(),
+           last_error = NULL
+       WHERE id IN (SELECT id FROM candidate)
+       RETURNING id,
+                 file_id,
+                 callback_status,
+                 callback_url,
+                 callback_users,
+                 payload,
+                 status,
+                 attempts,
+                 next_attempt_at::text,
+                 processing_started_at::text,
+                 completed_at::text,
+                 last_error,
+                 created_at::text,
+                 updated_at::text`
+    );
+    await client.query("COMMIT");
+    return claimed.rows[0] ? mapEditorCallbackJob(claimed.rows[0]) : null;
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
+export async function completeEditorCallbackJob(jobId: string): Promise<void> {
+  await pool.query(
+    `UPDATE editor_callback_jobs
+     SET status = 'COMPLETED',
+         completed_at = NOW(),
+         updated_at = NOW(),
+         last_error = NULL
+     WHERE id = $1`,
+    [jobId]
+  );
+}
+
+export async function rescheduleEditorCallbackJob(input: {
+  jobId: string;
+  attempts: number;
+  lastError: string;
+}): Promise<void> {
+  const maxAttempts = 12;
+  const delaySeconds = Math.min(90, Math.max(15, input.attempts * 15));
+  const exhausted = input.attempts >= maxAttempts;
+
+  await pool.query(
+    `UPDATE editor_callback_jobs
+     SET status = $2,
+         next_attempt_at = CASE
+           WHEN $2 = 'PENDING' THEN NOW() + ($3 || ' seconds')::interval
+           ELSE next_attempt_at
+         END,
+         updated_at = NOW(),
+         last_error = $4
+     WHERE id = $1`,
+    [input.jobId, exhausted ? "FAILED" : "PENDING", delaySeconds, input.lastError]
+  );
 }
 
 export async function upsertPermissionGrant(input: {

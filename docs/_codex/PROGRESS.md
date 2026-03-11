@@ -257,9 +257,11 @@
   - ONLYOFFICE command service accepted `forcesave` with `error = 0`
   - ONLYOFFICE sent callback requests with both `status = 6` and later `status = 2`
   - callback token lifetime was extended from `15m` to `8h` for content and callback URLs
-  - callback download retry logic was expanded
+  - callback handling was moved into an asynchronous database-backed job queue
+  - job retries now use delayed re-scheduling instead of blocking the HTTP callback
   - the test fixture was replaced with a real `.docx` file extracted from ONLYOFFICE itself
-  - the remaining blocker is still callback-time output download failure, even though the same normalized internal URL is reachable immediately afterwards from the API container
+  - the remaining blocker is still background output-download failure, even though the same normalized internal URL is reachable immediately afterwards from the API container
+  - `onlyoffice_save_failed` audit events now confirm the deferred failure path
 
 ## Current Position
 

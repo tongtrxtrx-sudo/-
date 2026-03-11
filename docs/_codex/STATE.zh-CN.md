@@ -133,9 +133,10 @@
   - API 能收到 callback
   - 浏览器编辑器会话是有效的
   - callback 失败后，同一条生成文件 URL 又能立即从 API 容器里访问
-  - callback token 生命周期和下载重试窗口都已经放大
+  - callback token 生命周期已经延长
+  - callback 处理已经改成了数据库驱动的异步 job 队列
   - 也已经用合法 `.docx` 夹具重跑过
-  - 但 callback 执行窗口内下载生成文件仍然失败
+  - 但异步 callback job 仍然以 `fetch failed` 失败，保存链路依旧没有生成新版本
 - 自动化批量导入和长期保留执行仍然超出当前已验证范围。
 
 ## 当前数据假设
@@ -146,7 +147,7 @@
 
 ## 下一实现切片
 
-- 当前活动切片：定位 callback 执行窗口内下载 ONLYOFFICE 生成文件失败的问题，直到保存和版本写回真正完成。
+- 当前活动切片：定位为什么异步 ONLYOFFICE callback job 仍然无法下载生成文件，直到保存和版本写回真正完成。
 - 解决这个阻塞后，下一步是重跑 forcesave 验证，并确认版本创建和 `onlyoffice_saved` 审计事件。
 
 ## 保护规则

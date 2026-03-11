@@ -8,13 +8,14 @@ import { requireAuth } from "../auth.js";
 import {
   acquireFileLock,
   createAuditEvent,
+  enqueueEditorCallbackJob,
   findFileById,
   findUserById,
   releaseFileLock,
-  replaceFileContent
 } from "../db.js";
 import { resolveFileAccess, resolveTargetManageAccess } from "../permissions.js";
-import { readBuffer, saveBuffer } from "../storage.js";
+import { readBuffer } from "../storage.js";
+import { ensureAllowedOnlyOfficeCallbackUrl } from "../editorCallbackProcessor.js";
 
 const editorParamsSchema = z.object({
   fileId: z.string().uuid()
@@ -42,15 +43,6 @@ function onlyOfficePublicUrl(): string {
   }
 
   return env.ONLYOFFICE_DOCUMENT_SERVER_URL;
-}
-
-function onlyOfficeInternalUrl(): string {
-  const internalUrl = env.ONLYOFFICE_DOCUMENT_SERVER_INTERNAL_URL ?? env.ONLYOFFICE_DOCUMENT_SERVER_URL;
-  if (!internalUrl) {
-    throw new Error("ONLYOFFICE document server is not configured.");
-  }
-
-  return internalUrl;
 }
 
 function extensionForFile(fileName: string): string {
@@ -94,66 +86,6 @@ function verifyEditorToken(token: string, expectedPurpose: string, fileId: strin
   if (decoded.purpose !== expectedPurpose || decoded.fileId !== fileId) {
     throw new Error("Invalid editor token.");
   }
-}
-
-function allowedOnlyOfficeOrigins(): string[] {
-  const origins = new Set<string>();
-
-  if (env.ONLYOFFICE_DOCUMENT_SERVER_URL) {
-    origins.add(new URL(env.ONLYOFFICE_DOCUMENT_SERVER_URL).origin);
-  }
-
-  if (env.ONLYOFFICE_DOCUMENT_SERVER_INTERNAL_URL) {
-    origins.add(new URL(env.ONLYOFFICE_DOCUMENT_SERVER_INTERNAL_URL).origin);
-  }
-
-  return [...origins];
-}
-
-function ensureAllowedOnlyOfficeCallbackUrl(callbackUrl: string): void {
-  const actualOrigin = new URL(callbackUrl).origin;
-  if (!allowedOnlyOfficeOrigins().includes(actualOrigin)) {
-    throw new Error("ONLYOFFICE callback URL origin does not match the configured document server.");
-  }
-}
-
-function normalizeOnlyOfficeDownloadUrl(callbackUrl: string): string {
-  ensureAllowedOnlyOfficeCallbackUrl(callbackUrl);
-
-  const internalOrigin = new URL(onlyOfficeInternalUrl()).origin;
-  const normalized = new URL(callbackUrl);
-  normalized.protocol = new URL(internalOrigin).protocol;
-  normalized.host = new URL(internalOrigin).host;
-  return normalized.toString();
-}
-
-async function fetchOnlyOfficeCallbackContent(callbackUrl: string): Promise<Response> {
-  const normalizedUrl = normalizeOnlyOfficeDownloadUrl(callbackUrl);
-  let lastError: Error | null = null;
-
-  for (let attempt = 1; attempt <= 30; attempt += 1) {
-    try {
-      const response = await fetch(normalizedUrl, {
-        signal: AbortSignal.timeout(2000)
-      });
-
-      if (response.ok) {
-        return response;
-      }
-
-      lastError = new Error(`ONLYOFFICE callback download returned status ${response.status}.`);
-    } catch (error) {
-      lastError = error as Error;
-    }
-
-    if (attempt < 30) {
-      await new Promise((resolve) => {
-        setTimeout(resolve, 1000);
-      });
-    }
-  }
-
-  throw new Error(`Failed to fetch saved content from ONLYOFFICE callback URL after retries: ${lastError?.message ?? "unknown error"}`);
 }
 
 export async function registerEditorRoutes(app: FastifyInstance): Promise<void> {
@@ -309,39 +241,13 @@ export async function registerEditorRoutes(app: FastifyInstance): Promise<void> 
         verifyEditorToken(query.token, "onlyoffice-callback", params.fileId);
 
         if ((body.status === 2 || body.status === 6) && body.url) {
-          const response = await fetchOnlyOfficeCallbackContent(body.url);
-
-          const arrayBuffer = await response.arrayBuffer();
-          const file = await findFileById(params.fileId);
-          if (!file) {
-            throw new Error("File not found.");
-          }
-
-          const saved = await saveBuffer({
-            fileName: file.originalName,
-            content: Buffer.from(arrayBuffer)
-          });
-
-          const lastUserId = body.users?.[body.users.length - 1];
-          const editorUser = lastUserId ? await findUserById(lastUserId) : null;
-
-          await replaceFileContent({
+          ensureAllowedOnlyOfficeCallbackUrl(body.url);
+          await enqueueEditorCallbackJob({
             fileId: params.fileId,
-            storageKey: saved.storageKey,
-            originalName: file.originalName,
-            mimeType: file.mimeType,
-            sizeBytes: Number(response.headers.get("content-length") ?? arrayBuffer.byteLength),
-            updatedByUserId: editorUser?.id ?? null
-          });
-
-          await createAuditEvent({
-            actorUserId: editorUser?.id ?? null,
-            action: "onlyoffice_saved",
-            entityType: "file",
-            entityId: params.fileId,
-            details: {
-              status: body.status
-            }
+            callbackStatus: body.status,
+            callbackUrl: body.url,
+            callbackUsers: body.users ?? [],
+            payload: body as Record<string, unknown>
           });
         }
 

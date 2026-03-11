@@ -133,9 +133,10 @@
   - API receives them
   - browser sessions are valid
   - generated output URLs are reachable from the API container after the callback failure
-  - callback token lifetime and retry windows were increased
+  - callback token lifetime was increased
+  - callback handling was moved into an asynchronous database-backed job queue
   - a valid `.docx` fixture was used for re-validation
-  - but callback-time download still fails inside the handler
+  - but asynchronous callback jobs still fail with `fetch failed`, and the save path still does not create new versions
 - Automated bulk import and long-running retention execution remain beyond the current verified scope.
 
 ## Current Data Assumptions
@@ -146,7 +147,7 @@
 
 ## Next Implementation Slice
 
-- Active slice: debug callback-time download of ONLYOFFICE generated output so save-and-version behavior can complete.
+- Active slice: debug why asynchronous ONLYOFFICE callback jobs still fail to download generated output even though the same URLs later become reachable from the API container.
 - After this blocker is resolved, re-run forcesave validation and confirm version creation plus `onlyoffice_saved` audit events.
 
 ## Guardrails

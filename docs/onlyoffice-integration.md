@@ -85,7 +85,8 @@ This document describes how the repository integrates with a self-hosted ONLYOFF
   - ONLYOFFICE successfully posts callback requests to the API
   - `forcesave` command requests return `error = 0`
   - browser editor sessions open successfully
-  - callback token lifetime has been extended and callback download retries have been increased
+  - callback token lifetime has been extended and callback handling has been moved into an asynchronous database-backed job queue
+  - background retries now use delayed job re-scheduling instead of blocking the HTTP callback
   - the file under test has been replaced with a valid `.docx` fixture
-  - but the API still fails while downloading the generated `output.docx` during callback time, even though the same internal URL is reachable immediately afterwards from the API container
+  - but the asynchronous job still fails while downloading the generated `output.docx`, even though the same internal URL is reachable immediately afterwards from the API container
 - Final production hardening for ONLYOFFICE deployment is still pending

@@ -257,9 +257,11 @@
   - ONLYOFFICE 命令服务接受了 `forcesave`，并返回 `error = 0`
   - ONLYOFFICE 实际发出了 `status = 6` 以及后续的 `status = 2` callback
   - 内容和回调 URL 的 token 有效期已经从 `15m` 提高到 `8h`
-  - callback 下载的重试窗口也已经放大
+  - callback 处理已经改成数据库驱动的异步 job 队列
+  - job 重试现在使用延后调度，而不是阻塞 HTTP callback
   - 测试夹具也已经替换为来自 ONLYOFFICE 自身生成的合法 `.docx`
-  - 但剩余阻塞点仍然是：callback 执行窗口内下载生成的 `output.docx` 失败，而同一条标准化后的内部 URL 在失败后又能立即从 API 容器访问
+  - 但剩余阻塞点仍然是：后台下载生成的 `output.docx` 仍然失败，而同一条标准化后的内部 URL 在失败后又能立即从 API 容器访问
+  - `onlyoffice_save_failed` 审计事件已经证明失败现在是通过异步 job 延后暴露出来的
 
 ## 当前所处位置
 

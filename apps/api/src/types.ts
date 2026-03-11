@@ -73,3 +73,20 @@ export interface FileLockRecord {
 }
 
 export interface KnowledgeEntryRecord extends KnowledgeEntrySummary {}
+
+export interface EditorCallbackJobRecord {
+  id: string;
+  fileId: string;
+  callbackStatus: number;
+  callbackUrl: string;
+  callbackUsers: string[];
+  payload: Record<string, unknown>;
+  status: "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED";
+  attempts: number;
+  nextAttemptAt: string;
+  processingStartedAt: string | null;
+  completedAt: string | null;
+  lastError: string | null;
+  createdAt: string;
+  updatedAt: string;
+}

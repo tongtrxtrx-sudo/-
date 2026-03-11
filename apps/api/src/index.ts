@@ -10,6 +10,7 @@ import { registerContentRoutes } from "./routes/content.js";
 import { registerSpaceRoutes } from "./routes/spaces.js";
 import { registerPublicKnowledgeRoutes } from "./routes/publicKnowledge.js";
 import { ensureStorageRoot } from "./storage.js";
+import { startEditorCallbackProcessor } from "./editorCallbackProcessor.js";
 
 const app = Fastify({
   logger: true
@@ -37,6 +38,11 @@ await registerEditorRoutes(app);
 await registerPublicKnowledgeRoutes(app);
 
 await bootstrapWithRetry();
+
+const stopEditorCallbackProcessor = startEditorCallbackProcessor(app.log);
+app.addHook("onClose", async () => {
+  stopEditorCallbackProcessor();
+});
 
 await app.listen({
   host: "0.0.0.0",
