@@ -1885,6 +1885,7 @@ export async function acquireFileLock(input: {
 }): Promise<{
   lock: FileLockRecord | null;
   granted: boolean;
+  state: "ACQUIRED" | "RENEWED" | "DENIED";
 }> {
   const existing = await getActiveFileLock(input.fileId);
   const expiresAt = new Date(Date.now() + env.EDIT_LOCK_MINUTES * 60 * 1000).toISOString();
@@ -1898,7 +1899,8 @@ export async function acquireFileLock(input: {
     );
     return {
       lock: mapFileLock(requireFirstRow(inserted.rows, "Failed to create file lock.")),
-      granted: true
+      granted: true,
+      state: "ACQUIRED"
     };
   }
 
@@ -1912,13 +1914,15 @@ export async function acquireFileLock(input: {
     );
     return {
       lock: mapFileLock(requireFirstRow(updated.rows, "Failed to renew file lock.")),
-      granted: true
+      granted: true,
+      state: "RENEWED"
     };
   }
 
   return {
     lock: existing,
-    granted: false
+    granted: false,
+    state: "DENIED"
   };
 }
 

@@ -48,6 +48,8 @@ interface EditorSessionPayload {
     expiresAt: string;
   } | null;
   canEdit: boolean;
+  mode: "edit" | "view";
+  modeReason: "EDIT_LOCK_ACQUIRED" | "EDIT_LOCK_RENEWED" | "LOCKED_BY_OTHER_USER" | "READ_ONLY_PERMISSION";
 }
 
 interface OnlyOfficeStatus {
@@ -1039,6 +1041,21 @@ export function App(): ReactElement {
     return extension === "docx" || extension === "xlsx" || extension === "pptx";
   }
 
+  function describeEditorModeReason(session: EditorSessionPayload): string {
+    switch (session.modeReason) {
+      case "EDIT_LOCK_ACQUIRED":
+        return "Editor session loaded with a new single-editor lock.";
+      case "EDIT_LOCK_RENEWED":
+        return "Editor session loaded and your existing lock was renewed.";
+      case "LOCKED_BY_OTHER_USER":
+        return "Editor opened in view mode because another user currently holds the edit lock.";
+      case "READ_ONLY_PERMISSION":
+        return "Editor opened in view mode because you do not have edit permission for this file.";
+      default:
+        return "Editor session loaded.";
+    }
+  }
+
   async function openEditorSession(): Promise<void> {
     if (!token || !selectedTarget || selectedTarget.kind !== "FILE") {
       return;
@@ -1053,10 +1070,35 @@ export function App(): ReactElement {
         token
       );
       setEditorSession(payload);
-      setMessage(payload.canEdit ? "Editor session loaded." : "Editor opened in view mode because the file is locked or read-only.");
+      setMessage(describeEditorModeReason(payload));
     } catch (error) {
       setMessage((error as Error).message);
       setEditorSession(null);
+    } finally {
+      setWorking(false);
+    }
+  }
+
+  async function forceUnlockEditor(): Promise<void> {
+    if (!token || !selectedTarget || selectedTarget.kind !== "FILE") {
+      return;
+    }
+
+    setWorking(true);
+    setMessage("");
+    try {
+      await apiRequest(
+        `/editor/files/${selectedTarget.item.id}/force-unlock`,
+        {
+          method: "POST",
+          body: JSON.stringify({})
+        },
+        token
+      );
+      setMessage("Editor lock released. Reloading the editor session.");
+      await openEditorSession();
+    } catch (error) {
+      setMessage((error as Error).message);
     } finally {
       setWorking(false);
     }
@@ -1260,6 +1302,14 @@ export function App(): ReactElement {
                 <p className="hint">
                   Lock owner: {resolveUserLabel(editorSession.lock.lockedByUserId)} | Expires: {new Date(editorSession.lock.expiresAt).toLocaleString()}
                 </p>
+              ) : null}
+              {editorSession && !editorSession.canEdit ? (
+                <p className="hint">{describeEditorModeReason(editorSession)}</p>
+              ) : null}
+              {editorSession?.lock && !editorSession.canEdit && canManage ? (
+                <button className="secondary" disabled={working} onClick={() => void forceUnlockEditor()} type="button">
+                  {working ? "Working..." : "Force Unlock"}
+                </button>
               ) : null}
             </section>
           ) : null}

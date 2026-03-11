@@ -12,6 +12,9 @@ This document describes how the repository integrates with a self-hosted ONLYOFF
 - Backend force-unlock endpoint exists: `POST /editor/files/:fileId/force-unlock`
 - File-lock persistence exists in the application database
 - A minimal frontend launcher exists for supported Office files
+- Session responses now distinguish edit mode, read-only permission mode, and lock-held-by-other-user mode
+- Callback downloads are restricted to the configured ONLYOFFICE document-server origin
+- Audit events now cover lock acquisition, lock renewal, locked read-only opens, callback save, callback release, and force unlock
 - Real editor runtime validation is blocked until a reachable ONLYOFFICE server is configured
 
 ## Required Environment Variables
@@ -36,6 +39,7 @@ This document describes how the repository integrates with a self-hosted ONLYOFF
 - The admin status endpoint reports that the document server is not configured
 - Editor session requests return a clear configuration error instead of failing silently
 - Existing non-editor file management behavior continues to work
+- Local API-level lock behavior can still be verified by configuring a placeholder document-server URL
 
 ## Expected Validation After The Server Is Available
 
@@ -54,5 +58,5 @@ This document describes how the repository integrates with a self-hosted ONLYOFF
 ## Known Gaps
 
 - The current environment does not yet provide a real document server
-- Full end-to-end editor save verification has not been completed
+- Full end-to-end editor save verification has not been completed against a reachable ONLYOFFICE server
 - Final production hardening for ONLYOFFICE deployment is still pending

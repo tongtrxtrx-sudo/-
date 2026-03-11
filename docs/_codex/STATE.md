@@ -4,8 +4,8 @@
 
 - Mode: `@build`
 - Product: V1 enterprise on-prem file platform
-- Current implementation phase: `post_v1`
-- Current implementation focus: V1 is implementation-complete under the user-approved Phase 4 skip; release assessment is now documented for handoff and next-scope selection
+- Current implementation phase: `phase_4`
+- Current implementation focus: Phase 4 has been resumed from the prior skip state; the current slice strengthens editor lock behavior, callback safety, and operator recovery before real document-server validation
 - Last continuity refresh: 2026-03-11
 
 ## Source Of Truth
@@ -25,7 +25,7 @@
 - Phase 3 version history slice: complete
 - Phase 3 quota groundwork: complete
 - Phase 3 retention groundwork: complete
-- Phase 4 online editing integration: skipped by explicit user direction
+- Phase 4 online editing integration: in progress after explicit user resumption
 - Phase 5 public knowledge release hardening: complete
 - Post-V1 release assessment: complete
 
@@ -117,7 +117,7 @@
 ## Known Gaps
 
 - Delete currently stops at recycle bin and does not yet enforce retention expiry rules.
-- Phase 4 remains intentionally skipped until a real ONLYOFFICE document server is available.
+- Real save-and-callback verification still requires a reachable ONLYOFFICE document server.
 - Automated bulk import and long-running retention execution remain beyond the current verified scope.
 
 ## Current Data Assumptions
@@ -128,12 +128,8 @@
 
 ## Next Implementation Slice
 
-- No active implementation slice is currently in progress.
-- Choose one of the following before resuming `@build` implementation:
-  - restore Phase 4 with a real ONLYOFFICE document server
-  - automate first-wave import execution
-  - implement retention execution beyond the current groundwork
-  - add automated regression coverage for critical flows
+- Active slice: strengthen editor lock semantics, callback safety checks, and operator recovery paths for Phase 4.
+- After this slice, validate real editor save behavior against a reachable ONLYOFFICE document server.
 
 ## Guardrails
 

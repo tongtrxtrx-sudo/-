@@ -2,8 +2,8 @@
   "version": 2,
   "last_updated": "2026-03-11",
   "workflow": "@build",
-  "active_phase": "post_v1",
-  "next_task_id": null,
+  "active_phase": "phase_4",
+  "next_task_id": "phase_4_editor_integration",
   "source_artifacts": {
     "brief": "docs/brief.md",
     "architecture": "docs/architecture.md",
@@ -15,7 +15,7 @@
     "phase_1": "completed",
     "phase_2": "completed",
     "phase_3": "completed",
-    "phase_4": "skipped_by_user",
+    "phase_4": "in_progress",
     "phase_5": "completed",
     "post_v1": "completed"
   },

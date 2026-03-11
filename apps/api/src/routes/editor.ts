@@ -25,6 +25,12 @@ const callbackBodySchema = z.object({
   users: z.array(z.string()).optional()
 });
 
+type EditorModeReason =
+  | "EDIT_LOCK_ACQUIRED"
+  | "EDIT_LOCK_RENEWED"
+  | "LOCKED_BY_OTHER_USER"
+  | "READ_ONLY_PERMISSION";
+
 function onlyOfficeSecret(): string {
   return env.ONLYOFFICE_JWT_SECRET ?? env.JWT_SECRET;
 }
@@ -69,6 +75,19 @@ function verifyEditorToken(token: string, expectedPurpose: string, fileId: strin
   }
 }
 
+function ensureAllowedOnlyOfficeCallbackUrl(callbackUrl: string): void {
+  if (!env.ONLYOFFICE_DOCUMENT_SERVER_URL) {
+    throw new Error("ONLYOFFICE document server is not configured.");
+  }
+
+  const expectedOrigin = new URL(env.ONLYOFFICE_DOCUMENT_SERVER_URL).origin;
+  const actualOrigin = new URL(callbackUrl).origin;
+
+  if (expectedOrigin !== actualOrigin) {
+    throw new Error("ONLYOFFICE callback URL origin does not match the configured document server.");
+  }
+}
+
 export async function registerEditorRoutes(app: FastifyInstance): Promise<void> {
   app.get(
     "/editor/files/:fileId/session",
@@ -107,9 +126,16 @@ export async function registerEditorRoutes(app: FastifyInstance): Promise<void> 
               fileId: resolved.file.id,
               userId: request.requestUser.id
             })
-          : { granted: false, lock: null };
+          : { granted: false, lock: null, state: "DENIED" as const };
 
         const canEdit = resolved.capabilities.canEdit && lockResult.granted;
+        const modeReason: EditorModeReason = canEdit
+          ? lockResult.state === "RENEWED"
+            ? "EDIT_LOCK_RENEWED"
+            : "EDIT_LOCK_ACQUIRED"
+          : resolved.capabilities.canEdit
+            ? "LOCKED_BY_OTHER_USER"
+            : "READ_ONLY_PERMISSION";
         const fileKey = createHash("sha256")
           .update(`${resolved.file.id}:${resolved.file.updatedAt}:${resolved.file.storageKey}`)
           .digest("hex")
@@ -143,12 +169,32 @@ export async function registerEditorRoutes(app: FastifyInstance): Promise<void> 
 
         const token = signEditorToken(config);
 
+        await createAuditEvent({
+          actorUserId: request.requestUser.id,
+          action: canEdit
+            ? lockResult.state === "RENEWED"
+              ? "onlyoffice_lock_renewed"
+              : "onlyoffice_lock_acquired"
+            : modeReason === "LOCKED_BY_OTHER_USER"
+              ? "onlyoffice_opened_locked_view"
+              : "onlyoffice_opened_read_only",
+          entityType: "file",
+          entityId: resolved.file.id,
+          details: {
+            mode: canEdit ? "edit" : "view",
+            modeReason,
+            lockOwnerUserId: lockResult.lock?.lockedByUserId ?? null
+          }
+        });
+
         return {
           documentServerUrl: env.ONLYOFFICE_DOCUMENT_SERVER_URL,
           config,
           token,
           lock: lockResult.lock,
-          canEdit
+          canEdit,
+          mode: canEdit ? "edit" : "view",
+          modeReason
         };
       } catch (error) {
         return reply.code(400).send({ message: (error as Error).message });
@@ -195,6 +241,7 @@ export async function registerEditorRoutes(app: FastifyInstance): Promise<void> 
         verifyEditorToken(query.token, "onlyoffice-callback", params.fileId);
 
         if ((body.status === 2 || body.status === 6) && body.url) {
+          ensureAllowedOnlyOfficeCallbackUrl(body.url);
           const response = await fetch(body.url);
           if (!response.ok) {
             throw new Error("Failed to fetch saved content from ONLYOFFICE callback URL.");
@@ -235,7 +282,22 @@ export async function registerEditorRoutes(app: FastifyInstance): Promise<void> 
         }
 
         if (body.status === 2 || body.status === 4) {
-          await releaseFileLock(params.fileId);
+          const releasedLock = await releaseFileLock(params.fileId);
+          if (releasedLock) {
+            const lastUserId = body.users?.[body.users.length - 1] ?? null;
+            const editorUser = lastUserId ? await findUserById(lastUserId) : null;
+
+            await createAuditEvent({
+              actorUserId: editorUser?.id ?? null,
+              action: "onlyoffice_lock_released",
+              entityType: "file",
+              entityId: params.fileId,
+              details: {
+                status: body.status,
+                previousLockOwnerUserId: releasedLock.lockedByUserId
+              }
+            });
+          }
         }
 
         return reply.send({ error: 0 });

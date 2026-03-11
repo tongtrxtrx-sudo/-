@@ -203,6 +203,18 @@
 - Manual bilingual alignment review of the new release assessment pair
 - Continuity files updated to reflect that no implementation slice is active
 
+## 2026-03-11 - Phase 4 Resumed: Lock Semantics And Callback Safety
+
+- Resumed `phase_4_editor_integration` from the earlier user-approved skip state.
+- Added richer editor-session mode signaling so the UI can distinguish:
+  - edit lock acquired
+  - edit lock renewed
+  - read-only because another user holds the lock
+  - read-only because the user lacks edit permission
+- Restricted ONLYOFFICE callback download URLs to the configured document-server origin.
+- Added audit coverage for lock acquire, lock renew, locked read-only open, callback lock release, and force unlock.
+- Added frontend force-unlock support for authorized operators when a file is opened read-only because another user holds the lock.
+
 ## Current Position
 
 - Phase 1: complete
@@ -214,4 +226,4 @@
 - Phase 5 public-knowledge metadata slice: complete
 - Phase 5 import-and-release hardening slice: complete
 - Post-V1 release assessment: complete
-- No further V1 implementation slice is active
+- Phase 4 resumed slice: in progress
