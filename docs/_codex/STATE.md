@@ -116,13 +116,18 @@
     - second authorized editor receives locked view mode
     - force unlock releases the lock
     - second editor can acquire a fresh edit lock afterwards
+  - Phase 4 real ONLYOFFICE runtime behavior:
+    - browser-facing `api.js` returns HTTP 200
+    - admin status reports configured and reachable service
+    - editor session returns public and internal URL split as expected
+    - browser opens a real ONLYOFFICE iframe for a supported `.docx` file
 - Documentation verification completed:
   - bilingual alignment review for `docs/release-assessment.md`
 
 ## Known Gaps
 
 - Delete currently stops at recycle bin and does not yet enforce retention expiry rules.
-- Real save-and-callback verification still requires a reachable ONLYOFFICE document server.
+- Real save-and-callback content round-trip still remains to be verified against the reachable ONLYOFFICE document server.
 - Automated bulk import and long-running retention execution remain beyond the current verified scope.
 
 ## Current Data Assumptions

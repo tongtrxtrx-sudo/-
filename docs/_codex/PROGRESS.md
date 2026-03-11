@@ -243,8 +243,17 @@
 - `npm run typecheck`
 - `npm run build`
 - `docker compose --env-file .env.example -f deploy/docker-compose.yml config`
-- First-run image pull started for `onlyoffice/documentserver:latest`
-- Final runtime verification is still pending because the official image pull and first startup are still in progress
+- Compose defaults were pinned to the already available `onlyoffice/documentserver:8.3` image to avoid blocking validation on the very large `latest` tag pull
+- Real runtime verification:
+  - `http://localhost:8080/web-apps/apps/api/documents/api.js` returned `200 OK`
+  - admin ONLYOFFICE status reported `configured = true` and `reachable = true`
+  - editor session returned:
+    - public editor URL `http://localhost:8080`
+    - internal editor URL `http://onlyoffice`
+    - public API base URL `http://localhost:3001`
+    - internal API base URL `http://api:3001`
+  - browser automation opened a real ONLYOFFICE iframe for a supported `.docx` file
+- Remaining gap: real save callback and version creation through the live editor are still pending
 
 ## Current Position
 

@@ -243,8 +243,17 @@
 - `npm run typecheck`
 - `npm run build`
 - `docker compose --env-file .env.example -f deploy/docker-compose.yml config`
-- 已启动 `onlyoffice/documentserver:latest` 的首次镜像拉取
-- 最终运行态验证仍在等待官方镜像拉取完成和首次启动结束
+- 已把 Compose 默认镜像固定为本机已存在的 `onlyoffice/documentserver:8.3`，避免继续被体积很大的 `latest` 标签首次拉取阻塞
+- 真实运行态验证结果：
+  - `http://localhost:8080/web-apps/apps/api/documents/api.js` 返回 `200 OK`
+  - 管理员 ONLYOFFICE 状态接口返回 `configured = true` 且 `reachable = true`
+  - 编辑会话返回了：
+    - 浏览器编辑器地址 `http://localhost:8080`
+    - 内部编辑器地址 `http://onlyoffice`
+    - 浏览器 API 地址 `http://localhost:3001`
+    - 容器内部 API 地址 `http://api:3001`
+  - 浏览器自动化已经为一个受支持的 `.docx` 文件打开了真实 ONLYOFFICE iframe
+- 剩余缺口：通过真实编辑器触发保存回调并生成新版本这条链路仍未完成
 
 ## 当前所处位置
 

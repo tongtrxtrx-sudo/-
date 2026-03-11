@@ -51,6 +51,9 @@
   - 第二个有权限的编辑者会退化为因持锁而只读
   - 强制解锁会释放当前锁
   - 强制解锁后，第二个编辑者可以重新拿到新的编辑锁
+  - 浏览器可以成功加载 `http://localhost:8080/web-apps/apps/api/documents/api.js`
+  - 管理员状态页显示 `Configured = Yes` 且 `Reachable = Yes`
+  - 浏览器里可以为受支持的 `.docx` 文件实际打开一个编辑器 iframe
 
 ## Docker Compose 接线
 
@@ -58,7 +61,7 @@
 - API 容器访问编辑器的默认内部地址：`http://onlyoffice`
 - API 对浏览器暴露的默认地址：`http://localhost:3001`
 - API 在容器网络中的默认内部地址：`http://api:3001`
-- Compose 默认使用的镜像：`onlyoffice/documentserver:latest`
+- Compose 默认使用的镜像：`onlyoffice/documentserver:8.3`
 
 ## 文档服务器可用后的预期验证步骤
 
@@ -76,6 +79,6 @@
 
 ## 已知缺口
 
-- 第一次启动文档服务器仍然依赖 Docker 拉取一个很大的官方镜像
+- 第一次启动文档服务器仍然依赖目标官方镜像已存在于本机，或者先被 Docker 拉取完成
 - 面向可访问 ONLYOFFICE 服务的真实编辑器保存回调端到端验证尚未完成
 - ONLYOFFICE 的生产部署加固尚未完成

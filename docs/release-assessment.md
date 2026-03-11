@@ -35,12 +35,13 @@ The following areas have implementation and direct verification evidence:
 - Maintenance overview and quota refresh execution path
 - Public knowledge category list, publish flow, entry list, and status update
 - API-level editor lock acquisition, lock denial, and force unlock behavior with a placeholder ONLYOFFICE document-server URL
+- Real ONLYOFFICE runtime reachability, status reporting, session generation, and browser editor open
 
 ## Untested Or Partially Tested Scope
 
 The following areas remain unverified or only scaffolded:
 
-- Real ONLYOFFICE editor runtime against a reachable document server, including browser editor open and save-callback content round-trip
+- Real ONLYOFFICE save-callback content round-trip against a reachable document server
 - Automated bulk import execution against a realistic department data set
 - Long-running retention execution, including recycle expiry and version pruning over time
 - Full browser-based end-to-end regression coverage
@@ -51,13 +52,14 @@ The following areas remain unverified or only scaffolded:
 The following items should be treated as blockers for a broader production release:
 
 1. Provide and validate a real ONLYOFFICE document server if online editing is part of the release promise.
-2. Replace or reset seeded development accounts and verify production secret values.
-3. Confirm persistent storage mapping for PostgreSQL and file storage on the target server.
-4. Decide whether first-wave data import remains operator-driven or must become automated before release.
+2. Validate real ONLYOFFICE save callbacks and version creation before promising full online editing in production.
+3. Replace or reset seeded development accounts and verify production secret values.
+4. Confirm persistent storage mapping for PostgreSQL and file storage on the target server.
+5. Decide whether first-wave data import remains operator-driven or must become automated before release.
 
 ## Residual Risks
 
-- Online editing remains the largest unresolved runtime dependency.
+- Online editing save behavior remains the largest unresolved runtime dependency.
 - Import is still partially manual, which increases operator error risk during first rollout.
 - Retention groundwork exists, but scheduled cleanup and long-horizon validation are still pending.
 - Regression confidence depends mostly on manual verification rather than a dedicated automated end-to-end suite.

@@ -51,6 +51,9 @@ This document describes how the repository integrates with a self-hosted ONLYOFF
   - second authorized editor falls back to locked read-only mode
   - force unlock releases the lock
   - the second editor can acquire a fresh lock after force unlock
+  - the browser can load `http://localhost:8080/web-apps/apps/api/documents/api.js`
+  - the admin UI shows `Configured = Yes` and `Reachable = Yes`
+  - a real editor iframe opens in the browser for a supported `.docx` file
 
 ## Docker Compose Wiring
 
@@ -58,7 +61,7 @@ This document describes how the repository integrates with a self-hosted ONLYOFF
 - API-facing internal editor URL default: `http://onlyoffice`
 - API public base URL default: `http://localhost:3001`
 - API internal base URL default: `http://api:3001`
-- Default Compose image: `onlyoffice/documentserver:latest`
+- Default Compose image: `onlyoffice/documentserver:8.3`
 
 ## Expected Validation After The Server Is Available
 
@@ -76,6 +79,6 @@ This document describes how the repository integrates with a self-hosted ONLYOFF
 
 ## Known Gaps
 
-- First-run document-server startup still depends on pulling a large official image into Docker
+- First-run document-server startup still depends on the selected official image being present locally or being pulled into Docker
 - Full end-to-end editor save verification has not been completed against a reachable ONLYOFFICE server
 - Final production hardening for ONLYOFFICE deployment is still pending
