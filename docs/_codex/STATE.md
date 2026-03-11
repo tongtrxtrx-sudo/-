@@ -111,6 +111,11 @@
   - share grant, list, revoke
   - search result visibility and inaccessible-result skipping
   - recycle bin delete and restore for both folders and files
+  - Phase 4 API-level lock behavior with a placeholder ONLYOFFICE URL:
+    - first editor receives edit mode
+    - second authorized editor receives locked view mode
+    - force unlock releases the lock
+    - second editor can acquire a fresh edit lock afterwards
 - Documentation verification completed:
   - bilingual alignment review for `docs/release-assessment.md`
 

@@ -40,6 +40,11 @@ This document describes how the repository integrates with a self-hosted ONLYOFF
 - Editor session requests return a clear configuration error instead of failing silently
 - Existing non-editor file management behavior continues to work
 - Local API-level lock behavior can still be verified by configuring a placeholder document-server URL
+- Current verification evidence includes:
+  - first authorized editor receives an editable session
+  - second authorized editor falls back to locked read-only mode
+  - force unlock releases the lock
+  - the second editor can acquire a fresh lock after force unlock
 
 ## Expected Validation After The Server Is Available
 

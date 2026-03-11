@@ -34,12 +34,13 @@ The following areas have implementation and direct verification evidence:
 - Quota summary and occupied-storage accounting
 - Maintenance overview and quota refresh execution path
 - Public knowledge category list, publish flow, entry list, and status update
+- API-level editor lock acquisition, lock denial, and force unlock behavior with a placeholder ONLYOFFICE document-server URL
 
 ## Untested Or Partially Tested Scope
 
 The following areas remain unverified or only scaffolded:
 
-- Real ONLYOFFICE editor runtime, including document open, save callback, lock competition, and force unlock
+- Real ONLYOFFICE editor runtime against a reachable document server, including browser editor open and save-callback content round-trip
 - Automated bulk import execution against a realistic department data set
 - Long-running retention execution, including recycle expiry and version pruning over time
 - Full browser-based end-to-end regression coverage

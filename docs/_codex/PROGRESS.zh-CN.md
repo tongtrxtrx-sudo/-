@@ -215,6 +215,20 @@
 - 增加了锁获取、锁续期、因他人持锁而只读打开、回调释放锁和强制解锁的审计覆盖。
 - 当文件因他人持锁而只读打开时，前端为授权运维角色增加了强制解锁能力。
 
+### 验证
+
+- `npm run typecheck`
+- `npm run build`
+- 使用占位 ONLYOFFICE URL 的运行态链路：
+  - 第一个编辑会话返回 `canEdit = true`，`modeReason = EDIT_LOCK_ACQUIRED`
+  - 第二个有权限用户返回 `canEdit = false`，`modeReason = LOCKED_BY_OTHER_USER`
+  - 强制解锁成功释放当前锁
+  - 解锁后，第二个用户再次请求会返回 `canEdit = true`，`modeReason = EDIT_LOCK_ACQUIRED`
+- 针对该测试文件回查到的审计事件包括：
+  - `onlyoffice_lock_acquired`
+  - `onlyoffice_opened_locked_view`
+  - `file_force_unlocked`
+
 ## 当前所处位置
 
 - Phase 1：完成

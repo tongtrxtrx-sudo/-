@@ -215,6 +215,20 @@
 - Added audit coverage for lock acquire, lock renew, locked read-only open, callback lock release, and force unlock.
 - Added frontend force-unlock support for authorized operators when a file is opened read-only because another user holds the lock.
 
+### Verification
+
+- `npm run typecheck`
+- `npm run build`
+- Placeholder ONLYOFFICE URL runtime flow:
+  - first editor session returned `canEdit = true` and `modeReason = EDIT_LOCK_ACQUIRED`
+  - second authorized editor returned `canEdit = false` and `modeReason = LOCKED_BY_OTHER_USER`
+  - force unlock released the lock
+  - second editor then returned `canEdit = true` and `modeReason = EDIT_LOCK_ACQUIRED`
+- Audit events for the test file included:
+  - `onlyoffice_lock_acquired`
+  - `onlyoffice_opened_locked_view`
+  - `file_force_unlocked`
+
 ## Current Position
 
 - Phase 1: complete
