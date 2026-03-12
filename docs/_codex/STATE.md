@@ -137,6 +137,7 @@
   - callback handling was moved into an asynchronous database-backed job queue
   - a valid `.docx` fixture was used for re-validation
   - but asynchronous callback jobs still fail with `fetch failed`, and the save path still does not create new versions
+  - direct auth experiments show that forwarding the callback body token does not remove the output URL `403`
 - Automated bulk import and long-running retention execution remain beyond the current verified scope.
 
 ## Current Data Assumptions

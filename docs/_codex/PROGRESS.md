@@ -262,6 +262,11 @@
   - the test fixture was replaced with a real `.docx` file extracted from ONLYOFFICE itself
   - the remaining blocker is still background output-download failure, even though the same normalized internal URL is reachable immediately afterwards from the API container
   - `onlyoffice_save_failed` audit events now confirm the deferred failure path
+  - direct auth experiments confirmed that:
+    - plain GET on the generated output URL returns `403`
+    - `Authorization: Bearer <callback-body-token>` still returns `403`
+    - appending the same token as a query parameter still returns `403`
+    - therefore the blocker is not fixed by merely forwarding the callback body token
 
 ## Current Position
 

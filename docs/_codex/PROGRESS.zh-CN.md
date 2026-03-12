@@ -262,6 +262,11 @@
   - 测试夹具也已经替换为来自 ONLYOFFICE 自身生成的合法 `.docx`
   - 但剩余阻塞点仍然是：后台下载生成的 `output.docx` 仍然失败，而同一条标准化后的内部 URL 在失败后又能立即从 API 容器访问
   - `onlyoffice_save_failed` 审计事件已经证明失败现在是通过异步 job 延后暴露出来的
+  - 直接鉴权对照实验已经确认：
+    - 直接 GET 生成文件 URL 会返回 `403`
+    - 使用 `Authorization: Bearer <callback-body-token>` 仍然返回 `403`
+    - 把同一个 token 追加成 query 参数也仍然返回 `403`
+    - 因此问题并不能通过简单转发 callback body 里的 token 来解决
 
 ## 当前所处位置
 
