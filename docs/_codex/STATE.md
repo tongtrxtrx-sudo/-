@@ -138,6 +138,7 @@
   - a valid `.docx` fixture was used for re-validation
   - but asynchronous callback jobs still fail with `fetch failed`, and the save path still does not create new versions
   - direct auth experiments show that forwarding the callback body token does not remove the output URL `403`
+  - secure-link experiments show that the callback URL `md5` does not match a recomputation using the running Nginx `secure_link` formula and secret
 - Automated bulk import and long-running retention execution remain beyond the current verified scope.
 
 ## Current Data Assumptions

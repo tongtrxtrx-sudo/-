@@ -267,6 +267,10 @@
     - `Authorization: Bearer <callback-body-token>` still returns `403`
     - appending the same token as a query parameter still returns `403`
     - therefore the blocker is not fixed by merely forwarding the callback body token
+  - secure-link experiments confirmed that:
+    - the running Nginx config validates `secure_link_md5 "$secure_link_expires$uri$secure_link_secret"`
+    - the callback URL `md5` does not match a recomputation using the active `secure_link_secret`
+    - patching the URL to use the recomputed `md5` changes the response from `403` to `410`
 
 ## Current Position
 

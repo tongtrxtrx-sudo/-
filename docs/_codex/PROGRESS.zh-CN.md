@@ -267,6 +267,10 @@
     - 使用 `Authorization: Bearer <callback-body-token>` 仍然返回 `403`
     - 把同一个 token 追加成 query 参数也仍然返回 `403`
     - 因此问题并不能通过简单转发 callback body 里的 token 来解决
+  - secure-link 实验已经确认：
+    - 当前运行中的 Nginx 配置校验公式是 `secure_link_md5 \"$secure_link_expires$uri$secure_link_secret\"`
+    - callback URL 里的 `md5` 与按当前 `secure_link_secret` 重算出的值不一致
+    - 把 URL 里的 `md5` 改成重算值后，响应会从 `403` 变成 `410`
 
 ## 当前所处位置
 

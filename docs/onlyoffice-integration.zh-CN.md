@@ -89,9 +89,14 @@
   - 后台重试现在采用延后调度，而不是阻塞 HTTP callback
   - 测试文件也已经替换成合法的 `.docx` 夹具
   - 但异步 job 下载生成的 `output.docx` 仍然失败，而同一条内部 URL 在失败后又能立即从 API 容器里访问到
-  - 直接鉴权对照实验已经表明：
-    - 直接 GET 生成的 `output.docx` 会返回 `403`
-    - 把 callback body 里的 token 放到 `Authorization: Bearer ...` 头里仍然返回 `403`
-    - 把同一个 token 追加成 query 参数也仍然返回 `403`
-    - 因此当前阻塞点并不能通过“简单转发 callback body 里的 token”来解决
+- 直接鉴权对照实验已经表明：
+  - 直接 GET 生成的 `output.docx` 会返回 `403`
+  - 把 callback body 里的 token 放到 `Authorization: Bearer ...` 头里仍然返回 `403`
+  - 把同一个 token 追加成 query 参数也仍然返回 `403`
+  - 因此当前阻塞点并不能通过“简单转发 callback body 里的 token”来解决
+  - secure-link 校验实验进一步表明：
+    - 当前运行中的 Nginx 配置使用的是 `secure_link_md5 \"$secure_link_expires$uri$secure_link_secret\"`
+    - 按当前容器内生效的 `secure_link_secret` 对 callback URL 重算 `md5`，结果与 callback URL 自带的 `md5` 不一致
+    - 如果把 callback URL 里的 `md5` 改成重算值，错误会从 `403` 变成 `410`
+    - 这强烈说明：生成出来的输出 URL，并不是按当前运行中 Nginx 实际校验的那组 secure-link 输入来签名的
 - ONLYOFFICE 的生产部署加固尚未完成

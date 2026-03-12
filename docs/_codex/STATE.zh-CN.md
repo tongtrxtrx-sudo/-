@@ -138,6 +138,7 @@
   - 也已经用合法 `.docx` 夹具重跑过
   - 但异步 callback job 仍然以 `fetch failed` 失败，保存链路依旧没有生成新版本
   - 直接鉴权对照实验已经证明：简单转发 callback body 里的 token 也不能消除输出 URL 的 `403`
+  - secure-link 实验已经表明：callback URL 自带的 `md5` 与当前运行中 Nginx `secure_link` 公式和 secret 重算结果不一致
 - 自动化批量导入和长期保留执行仍然超出当前已验证范围。
 
 ## 当前数据假设

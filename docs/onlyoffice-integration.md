@@ -89,9 +89,14 @@ This document describes how the repository integrates with a self-hosted ONLYOFF
   - background retries now use delayed job re-scheduling instead of blocking the HTTP callback
   - the file under test has been replaced with a valid `.docx` fixture
   - but the asynchronous job still fails while downloading the generated `output.docx`, even though the same internal URL is reachable immediately afterwards from the API container
-  - direct auth experiments now show:
-    - plain GET on the generated `output.docx` returns `403`
-    - forwarding the callback body token as `Authorization: Bearer ...` still returns `403`
-    - appending the same token as a query parameter still returns `403`
-    - therefore the blocker is not fixed by simply forwarding the callback body token
+- direct auth experiments now show:
+  - plain GET on the generated `output.docx` returns `403`
+  - forwarding the callback body token as `Authorization: Bearer ...` still returns `403`
+  - appending the same token as a query parameter still returns `403`
+  - therefore the blocker is not fixed by simply forwarding the callback body token
+  - secure-link verification now shows:
+    - the active Nginx config validates `secure_link_md5 "$secure_link_expires$uri$secure_link_secret"`
+    - the callback URL `md5` does not match a recomputation using the running `secure_link_secret`
+    - replacing the callback URL `md5` with the recomputed value changes the response from `403` to `410`
+    - this strongly suggests that the generated output URL is not signed with the same effective secure-link inputs that the running Nginx config validates
 - Final production hardening for ONLYOFFICE deployment is still pending
