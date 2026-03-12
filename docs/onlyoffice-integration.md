@@ -31,6 +31,8 @@ This document describes how the repository integrates with a self-hosted ONLYOFF
   - Internal document-server URL used by the API container for callback download validation and fetches
 - `ONLYOFFICE_JWT_SECRET`
   - Optional JWT secret for signing ONLYOFFICE session payloads
+- `SECURE_LINK_SECRET`
+  - Secret used by the ONLYOFFICE image to generate and validate secure download links for cached output files
 - `EDIT_LOCK_MINUTES`
   - Edit-lock expiry in minutes
 

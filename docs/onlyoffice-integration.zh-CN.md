@@ -31,6 +31,8 @@
   - API 容器用于校验和拉取回调内容的 ONLYOFFICE 内部地址
 - `ONLYOFFICE_JWT_SECRET`
   - 可选，用于签名 ONLYOFFICE 会话载荷的 JWT 密钥
+- `SECURE_LINK_SECRET`
+  - ONLYOFFICE 镜像用于生成和校验缓存输出文件安全下载链接的密钥
 - `EDIT_LOCK_MINUTES`
   - 编辑锁的过期时间，单位分钟
 

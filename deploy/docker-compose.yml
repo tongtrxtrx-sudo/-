@@ -52,6 +52,7 @@ services:
     environment:
       JWT_SECRET: ${ONLYOFFICE_JWT_SECRET:-replace-with-a-long-random-secret}
       JWT_ENABLED: ${ONLYOFFICE_JWT_ENABLED:-true}
+      SECURE_LINK_SECRET: ${SECURE_LINK_SECRET:-replace-with-a-random-secure-link-secret}
     ports:
       - "${ONLYOFFICE_PORT:-8080}:80"
     volumes:
